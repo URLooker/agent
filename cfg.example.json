@@ -1,0 +1,10 @@
+{
+    "debug": false,
+    "hostname": "hostname.1",
+    "worker": 1000,
+    "web": {
+        "addrs": ["127.0.0.1:1985"],
+        "interval": 60,
+        "timeout": 1000
+    }
+}
