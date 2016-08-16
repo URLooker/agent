@@ -22,6 +22,7 @@ func Push() {
 		itemResults := g.CheckResultQueue.PopBack(500)
 		if len(itemResults) == 0 {
 			time.Sleep(1 * time.Second)
+			continue
 		}
 
 		for _, itemResult := range itemResults {
