@@ -41,6 +41,7 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 		Target:   item.Target,
 		Ip:       item.Ip,
 		RespTime: item.Timeout,
+		RespCode: "0",
 	}
 	reqStartTime := time.Now()
 	req := httplib.Get(item.Target)
