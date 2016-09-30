@@ -49,7 +49,7 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 	req.SetTimeout(3*time.Second, 10*time.Second)
 	req.Header("Content-Type", "application/x-www-form-urlencoded; param=value")
 	req.SetHost(item.Domain)
-	if item.Host != nil{
+	if item.Host != ""{
 		log.Print("set host is ", item.Host)
 		req.SetHost(item.Host)
 	}

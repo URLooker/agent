@@ -5,3 +5,5 @@ cfg.json
 *.iml
 
 *.xml
+
+cfg.example.json
