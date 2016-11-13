@@ -16,11 +16,11 @@ import (
 )
 
 const (
-	NO_ERROR          = 0
-	REQ_TIMEOUT       = 1
+	NO_ERROR = 0
+	REQ_TIMEOUT = 1
 	INVALID_RESP_CODE = 2
-	KEYWORD_UNMATCH   = 3
-	DNS_ERROR         = 4
+	KEYWORD_UNMATCH = 3
+	DNS_ERROR = 4
 )
 
 func CheckTargetStatus(item *webg.DetectedItem) {
@@ -45,48 +45,46 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 	}
 	reqStartTime := time.Now()
 
-    req := httplib.Get(item.Target)
-    method := item.Method
-    switch method {
-    	case "GET":
-    		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-			req.SetTimeout(3*time.Second, 10*time.Second)
-			req.Header("Content-Type", "application/x-www-form-urlencoded; param=value")
-			req.SetHost(item.Domain)
-		case "POST":
-			req := httplib.Post(item.Target)
-    		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-    		req.SetTimeout(3*time.Second, 10*time.Second)
-    		req.Header("Content-Type", "application/json; param=value")
-			req.SetHost(item.Domain)
-			if len(item.PostData) > 0 {
-				req.Body(item.PostData)
-			}
-		case "PUT":
-			req := httplib.Put(item.Target)
-    		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-    		req.SetTimeout(3*time.Second, 10*time.Second)
-    		req.Header("Content-Type", "application/json; param=value")
-			req.SetHost(item.Domain)
-			if len(item.PostData) > 0 {
-				req.Body(item.PostData)
-			}
-		case "DELETE":
-			req := httplib.Delete(item.Target)
-    		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-    		req.SetTimeout(3*time.Second, 10*time.Second)
-    		req.Header("Content-Type", "application/json; param=value")
-			req.SetHost(item.Domain)
-			if len(item.PostData) > 0 {
-				req.Body(item.PostData)
-			}
-    }
-
+	req := httplib.Get(item.Target)
+	method := item.Method
+	switch method {
+	case "GET":
+		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+		req.SetTimeout(3 * time.Second, 10 * time.Second)
+		req.Header("Content-Type", "application/x-www-form-urlencoded; param=value")
+		req.SetHost(item.Domain)
+	case "POST":
+		req := httplib.Post(item.Target)
+		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+		req.SetTimeout(3 * time.Second, 10 * time.Second)
+		req.Header("Content-Type", "application/json; param=value")
+		req.SetHost(item.Domain)
+		if len(item.PostData) > 0 {
+			req.Body(item.PostData)
+		}
+	case "PUT":
+		req := httplib.Put(item.Target)
+		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+		req.SetTimeout(3 * time.Second, 10 * time.Second)
+		req.Header("Content-Type", "application/json; param=value")
+		req.SetHost(item.Domain)
+		if len(item.PostData) > 0 {
+			req.Body(item.PostData)
+		}
+	case "DELETE":
+		req := httplib.Delete(item.Target)
+		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+		req.SetTimeout(3 * time.Second, 10 * time.Second)
+		req.Header("Content-Type", "application/json; param=value")
+		req.SetHost(item.Domain)
+		if len(item.PostData) > 0 {
+			req.Body(item.PostData)
+		}
+	}
 
 	if item.Data != "" {
 		req.Header("Cookie", item.Data)
 	}
-
 
 	resp, err := req.Response()
 	itemCheckResult.PushTime = time.Now().Unix()
