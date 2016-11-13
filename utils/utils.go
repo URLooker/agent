@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"fmt"
 
 	"github.com/astaxie/beego/httplib"
 	webg "github.com/urlooker/web/g"
