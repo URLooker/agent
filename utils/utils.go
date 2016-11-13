@@ -32,7 +32,7 @@ func CheckTargetStatus(item *webg.DetectedItem) {
 	g.CheckResultQueue.PushFront(checkResult)
 }
 
-func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResult) {
+func doCheckTargetStatus(item *webg.DetectedItem, req *httplib.BeegoHTTPRequest) (itemCheckResult *webg.CheckResult) {
 	itemCheckResult = &webg.CheckResult{
 		Sid:      item.Sid,
 		Domain:   item.Domain,
@@ -43,45 +43,16 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 		RespTime: item.Timeout,
 		RespCode: "0",
 	}
+
 	reqStartTime := time.Now()
 
-	req := httplib.Get(item.Target)
-	method := item.Method
-	switch method {
-	case "GET":
-		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-		req.SetTimeout(3 * time.Second, 10 * time.Second)
-		req.Header("Content-Type", "application/x-www-form-urlencoded; param=value")
-		req.SetHost(item.Domain)
-	case "POST":
-		req := httplib.Post(item.Target)
-		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-		req.SetTimeout(3 * time.Second, 10 * time.Second)
-		req.Header("Content-Type", "application/json; param=value")
-		req.SetHost(item.Domain)
-		if len(item.PostData) > 0 {
-			req.Body(item.PostData)
-		}
-	case "PUT":
-		req := httplib.Put(item.Target)
-		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-		req.SetTimeout(3 * time.Second, 10 * time.Second)
-		req.Header("Content-Type", "application/json; param=value")
-		req.SetHost(item.Domain)
-		if len(item.PostData) > 0 {
-			req.Body(item.PostData)
-		}
-	case "DELETE":
-		req := httplib.Delete(item.Target)
-		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-		req.SetTimeout(3 * time.Second, 10 * time.Second)
-		req.Header("Content-Type", "application/json; param=value")
-		req.SetHost(item.Domain)
-		if len(item.PostData) > 0 {
-			req.Body(item.PostData)
-		}
+	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	req.SetTimeout(3 * time.Second, 10 * time.Second)
+	req.Header("Content-Type", "application/json")
+	req.SetHost(item.Domain)
+	if len(item.PostData) > 0 && item.Method != "GET" {
+		req.Body(item.PostData)
 	}
-
 	if item.Data != "" {
 		req.Header("Cookie", item.Data)
 	}
@@ -122,5 +93,25 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 	} else {
 		itemCheckResult.Status = INVALID_RESP_CODE
 	}
+	return
+}
+
+func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResult) {
+	method := item.Method
+	switch method {
+	case "GET":
+		req := httplib.Get(item.Target)
+		doCheckTargetStatus(item, req)
+	case "POST":
+		req := httplib.Post(item.Target)
+		doCheckTargetStatus(item, req)
+	case "PUT":
+		req := httplib.Put(item.Target)
+		doCheckTargetStatus(item, req)
+	case "DELETE":
+		req := httplib.Delete(item.Target)
+		doCheckTargetStatus(item, req)
+	}
+
 	return
 }
