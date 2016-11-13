@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"fmt"
 
 	"github.com/astaxie/beego/httplib"
 	webg "github.com/urlooker/web/g"
@@ -44,14 +45,49 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 		RespCode: "0",
 	}
 	reqStartTime := time.Now()
-	req := httplib.Get(item.Target)
-	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	req.SetTimeout(3*time.Second, 10*time.Second)
-	req.Header("Content-Type", "application/x-www-form-urlencoded; param=value")
-	req.SetHost(item.Domain)
+
+    req := httplib.Get(item.Target)
+    method := item.Method
+    switch method {
+    	case "GET":
+    		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+			req.SetTimeout(3*time.Second, 10*time.Second)
+			req.Header("Content-Type", "application/x-www-form-urlencoded; param=value")
+			req.SetHost(item.Domain)
+		case "POST":
+			req := httplib.Post(item.Target)
+    		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+    		req.SetTimeout(3*time.Second, 10*time.Second)
+    		req.Header("Content-Type", "application/json; param=value")
+			req.SetHost(item.Domain)
+			if len(item.PostData) > 0 {
+				req.Body(item.PostData)
+			}
+		case "PUT":
+			req := httplib.Put(item.Target)
+    		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+    		req.SetTimeout(3*time.Second, 10*time.Second)
+    		req.Header("Content-Type", "application/json; param=value")
+			req.SetHost(item.Domain)
+			if len(item.PostData) > 0 {
+				req.Body(item.PostData)
+			}
+		case "DELETE":
+			req := httplib.Delete(item.Target)
+    		req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+    		req.SetTimeout(3*time.Second, 10*time.Second)
+    		req.Header("Content-Type", "application/json; param=value")
+			req.SetHost(item.Domain)
+			if len(item.PostData) > 0 {
+				req.Body(item.PostData)
+			}
+    }
+
+
 	if item.Data != "" {
 		req.Header("Cookie", item.Data)
 	}
+
 
 	resp, err := req.Response()
 	itemCheckResult.PushTime = time.Now().Unix()
