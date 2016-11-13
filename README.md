@@ -9,7 +9,7 @@ agent会定时从web组件获取待监控url列表，发起模拟访问，然后
 # set $GOPATH and $GOROOT
 mkdir -p $GOPATH/src/github.com/urlooker
 cd $GOPATH/src/github.com/urlooker
-git clone https://github.com/URLooker/agent.git
+git clone https://github.com/xiaolezheng/agent.git
 cd agent
 go get ./...
 ./control build
