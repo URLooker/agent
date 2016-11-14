@@ -73,6 +73,7 @@ func doCheckTargetStatus(item *webg.DetectedItem, req *httplib.BeegoHTTPRequest)
 	respTime := int(time.Now().Sub(reqStartTime).Nanoseconds() / 1000000)
 	itemCheckResult.RespTime = respTime
 
+	log.Println("[req_status]:", respCode + "|" + item.Target + "|" + respTime + "|" + item.Timeout)
 	if respTime > item.Timeout {
 		itemCheckResult.Status = REQ_TIMEOUT
 		return
@@ -81,7 +82,9 @@ func doCheckTargetStatus(item *webg.DetectedItem, req *httplib.BeegoHTTPRequest)
 	if strings.Index(respCode, item.ExpectCode) == 0 || (len(item.ExpectCode) == 0 && respCode == "200") {
 		if len(item.Keywords) > 0 {
 			contents, _ := ioutil.ReadAll(resp.Body)
-			if !strings.Contains(string(contents), item.Keywords) {
+			contentStr := string(contents)
+			if !strings.Contains(contentStr, item.Keywords) {
+				log.Println("[result is not expected]: ", item.Keywords + "$$$$$$$$" + contentStr)
 				itemCheckResult.Status = KEYWORD_UNMATCH
 				return
 			}
