@@ -101,16 +101,16 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 	switch method {
 	case "GET":
 		req := httplib.Get(item.Target)
-		doCheckTargetStatus(item, req)
+		return doCheckTargetStatus(item, req)
 	case "POST":
 		req := httplib.Post(item.Target)
-		doCheckTargetStatus(item, req)
+		return doCheckTargetStatus(item, req)
 	case "PUT":
 		req := httplib.Put(item.Target)
-		doCheckTargetStatus(item, req)
+		return doCheckTargetStatus(item, req)
 	case "DELETE":
 		req := httplib.Delete(item.Target)
-		doCheckTargetStatus(item, req)
+		return doCheckTargetStatus(item, req)
 	}
 
 	return
