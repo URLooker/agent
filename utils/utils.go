@@ -73,7 +73,7 @@ func doCheckTargetStatus(item *webg.DetectedItem, req *httplib.BeegoHTTPRequest)
 	respTime := int(time.Now().Sub(reqStartTime).Nanoseconds() / 1000000)
 	itemCheckResult.RespTime = respTime
 
-	log.Println("[req_status]:", respCode + "|" + item.Target + "|" + respTime + "|" + item.Timeout)
+	log.Println("[req_status]:", respCode + "|" + item.Target + "|" + string(respTime) + "|" + string(item.Timeout))
 	if respTime > item.Timeout {
 		itemCheckResult.Status = REQ_TIMEOUT
 		return
