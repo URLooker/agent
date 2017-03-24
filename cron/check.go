@@ -13,7 +13,7 @@ import (
 )
 
 func StartCheck() {
-	t1 := time.NewTicker(time.Duration(60) * time.Second)
+	t1 := time.NewTicker(time.Duration(g.Config.Web.Interval) * time.Second)
 	for {
 		items, _ := GetItem()
 
