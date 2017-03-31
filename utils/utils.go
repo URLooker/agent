@@ -16,11 +16,11 @@ import (
 )
 
 const (
-	NO_ERROR          = 0
-	REQ_TIMEOUT       = 1
+	NO_ERROR = 0
+	REQ_TIMEOUT = 1
 	INVALID_RESP_CODE = 2
-	KEYWORD_UNMATCH   = 3
-	DNS_ERROR         = 4
+	KEYWORD_UNMATCH = 3
+	DNS_ERROR = 4
 )
 
 func CheckTargetStatus(item *webg.DetectedItem) {
@@ -32,7 +32,7 @@ func CheckTargetStatus(item *webg.DetectedItem) {
 	g.CheckResultQueue.PushFront(checkResult)
 }
 
-func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResult) {
+func doCheckTargetStatus(item *webg.DetectedItem, req *httplib.BeegoHTTPRequest) (itemCheckResult *webg.CheckResult) {
 	itemCheckResult = &webg.CheckResult{
 		Sid:      item.Sid,
 		Domain:   item.Domain,
@@ -43,12 +43,16 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 		RespTime: item.Timeout,
 		RespCode: "0",
 	}
+
 	reqStartTime := time.Now()
-	req := httplib.Get(item.Target)
+
 	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	req.SetTimeout(3*time.Second, 10*time.Second)
-	req.Header("Content-Type", "application/x-www-form-urlencoded; param=value")
+	req.SetTimeout(3 * time.Second, 10 * time.Second)
+	req.Header("Content-Type", "application/json")
 	req.SetHost(item.Domain)
+	if len(item.PostData) > 0 && item.Method != "GET" {
+		req.Body(item.PostData)
+	}
 	if item.Data != "" {
 		req.Header("Cookie", item.Data)
 	}
@@ -69,6 +73,7 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 	respTime := int(time.Now().Sub(reqStartTime).Nanoseconds() / 1000000)
 	itemCheckResult.RespTime = respTime
 
+	log.Println("[req_status]:", respCode + "|" + item.Target + "|" + strconv.Itoa(respTime) + "|" + strconv.Itoa(item.Timeout))
 	if respTime > item.Timeout {
 		itemCheckResult.Status = REQ_TIMEOUT
 		return
@@ -77,7 +82,9 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 	if strings.Index(respCode, item.ExpectCode) == 0 || (len(item.ExpectCode) == 0 && respCode == "200") {
 		if len(item.Keywords) > 0 {
 			contents, _ := ioutil.ReadAll(resp.Body)
-			if !strings.Contains(string(contents), item.Keywords) {
+			contentStr := string(contents)
+			if !strings.Contains(contentStr, item.Keywords) {
+				log.Println("[result is not expected]: ", item.Target + "|" + item.Keywords + "|" + contentStr)
 				itemCheckResult.Status = KEYWORD_UNMATCH
 				return
 			}
@@ -89,5 +96,25 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 	} else {
 		itemCheckResult.Status = INVALID_RESP_CODE
 	}
+	return
+}
+
+func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResult) {
+	method := item.Method
+	switch method {
+	case "GET":
+		req := httplib.Get(item.Target)
+		return doCheckTargetStatus(item, req)
+	case "POST":
+		req := httplib.Post(item.Target)
+		return doCheckTargetStatus(item, req)
+	case "PUT":
+		req := httplib.Put(item.Target)
+		return doCheckTargetStatus(item, req)
+	case "DELETE":
+		req := httplib.Delete(item.Target)
+		return doCheckTargetStatus(item, req)
+	}
+
 	return
 }
