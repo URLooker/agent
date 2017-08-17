@@ -35,6 +35,7 @@ func Push() {
 			Hostname:     hostname,
 			CheckResults: checkResults,
 		}
+
 		err := backend.CallRpc("Web.SendResult", sendResultReq, &resp)
 		if err != nil {
 			log.Println("error:", err)

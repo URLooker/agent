@@ -31,10 +31,10 @@ func GetItem() ([]*webg.DetectedItem, error) {
 	var resp api.GetItemResponse
 	err := backend.CallRpc("Web.GetItem", hostname, &resp)
 	if err != nil {
-		log.Println(err)
+		log.Println("err:", err)
 	}
 	if resp.Message != "" {
-		log.Println(resp.Message)
+		log.Println("resp err:", resp.Message)
 	}
 
 	return resp.Data, err

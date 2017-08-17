@@ -28,20 +28,35 @@ func CheckTargetStatus(item *webg.DetectedItem) {
 		<-g.WorkerChan
 	}()
 
-	checkResult := checkTargetStatus(item)
-	g.CheckResultQueue.PushFront(checkResult)
+	if IsIP(item.Domain) {
+		checkResult := checkTargetStatus(item, item.Domain)
+		g.CheckResultQueue.PushFront(checkResult)
+		return
+	}
+
+	ips, err := LookupIP(item.Domain, 5000)
+	if err != nil {
+		log.Println("get ip err:", err, item.Domain)
+		return
+	}
+	for _, ip := range ips {
+		checkResult := checkTargetStatus(item, ip)
+		g.CheckResultQueue.PushFront(checkResult)
+	}
 }
 
-func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResult) {
+func checkTargetStatus(item *webg.DetectedItem, ip string) (itemCheckResult *webg.CheckResult) {
+
 	itemCheckResult = &webg.CheckResult{
-		Sid:      item.Sid,
-		Domain:   item.Domain,
-		Creator:  item.Creator,
-		Tag:      item.Tag,
-		Target:   item.Target,
-		Ip:       item.Ip,
-		RespTime: item.Timeout,
-		RespCode: "0",
+		Sid:        item.Sid,
+		Domain:     item.Domain,
+		Creator:    item.Creator,
+		Tag:        item.Tag,
+		Target:     item.Target,
+		Ip:         ip,
+		MonitorIdc: g.Config.Idc,
+		RespTime:   item.Timeout,
+		RespCode:   "0",
 	}
 	reqStartTime := time.Now()
 	req := httplib.Get(item.Target)
@@ -89,5 +104,6 @@ func checkTargetStatus(item *webg.DetectedItem) (itemCheckResult *webg.CheckResu
 	} else {
 		itemCheckResult.Status = INVALID_RESP_CODE
 	}
+
 	return
 }

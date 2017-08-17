@@ -1,7 +1,9 @@
 {
     "debug": false,
-    "hostname": "hostname.1",
+    "idc":"default",
+    "hostname": "hostname0",
     "worker": 1000,
+    "dns":"",
     "web": {
         "addrs": ["127.0.0.1:1985"],
         "interval": 60,

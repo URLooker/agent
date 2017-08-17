@@ -17,9 +17,11 @@ type WebConf struct {
 
 type GlobalConfig struct {
 	Debug    bool     `json:"debug"`
+	Idc      string   `json:"idc"`
 	Hostname string   `json:"hostname"`
 	Worker   int      `json:"worker"`
 	ItemAddr string   `json:"itemAddr"`
+	Dns      string   `json:"dns"`
 	Web      *WebConf `json:"web"`
 }
 
